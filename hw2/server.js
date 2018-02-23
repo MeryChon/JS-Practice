@@ -91,7 +91,6 @@ app.get("/reset", function(req, res) {
 
 // HTTP GET endpoint that resets the game only if it is finished
 app.get("/newgame", function(req, res) {
-	console.log("==================== New Game ======================");
 	if (gameEnded(board)) {
 		resetGame();
 		res.send(JSON.stringify(true));
@@ -129,25 +128,19 @@ var isLegalMove = function(row, col, player) {
 };
 
 
-// HTTP GET endpoint that makes a player move
-//Upon receiving the move, the server should first check if the move is legal.
+
 // TODO: Implement this
 app.get("/move", function(req, res) {
     console.log("------------- row: " + req.query.row + " -- col: "+req.query.col + " -- player: "+req.query.player);
     if(!isLegalMove(req.query.row, req.query.col, req.query.player)) {
     	res.send(JSON.stringify(false));
 	} else {
-		console.log("Server says: the move is legal.");
         res.send(JSON.stringify(true));
         board[req.query.row][req.query.col] = req.query.player;
-
-        console.log("board changed");
-
         if(gameEnded(board)) {
         	turn = "";
 		} else {
         	turn = getNextPlayer(turn);
-        	console.log("Server changed the turn it's now "+turn);
 		}
 	}
     res.end();

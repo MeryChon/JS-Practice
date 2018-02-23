@@ -1,5 +1,3 @@
-//var http = require('http');
-// var request = require('request');
 
 // Create game interface
 var gameUI = new GameUI(".container", player);
@@ -12,19 +10,22 @@ var init = function() {
     });
 
     var turn;
-    $.get("/turn", function(resp){
+    $.get("/turn", function(resp) {
         turn = resp.replace(/\"/g, "");
     });
 
+    //Here comes the most important part of client-side process
+    //Waiting for opponent, or current player to make a move and checking if the game is over;
     var timer = setInterval(function () {
-        $.get("/turn", function(resp){
-            turn = resp.replace(/\"/g, "");
+        $.get("/turn", function(resp) {
+            turn = JSON.parse(resp);//resp.replace(/\"/g, "");
         });
+
         if(turn === gameUI.player) {
-            gameUI.setMessage("It is my, " + turn.toUpperCase() + "'s turn.");
+            gameUI.setMessage("It is your move.");
             gameUI.waitForMove();
             waitForOpponentMove();
-        } else if(turn === ""){
+        } else if(turn === "") {
             gameUI.setMessage("The game has ended.");
             clearInterval(timer);
             $.get("/board", function(board) {
@@ -34,17 +35,13 @@ var init = function() {
             waitForOpponentMove();
         }
     }, 1000);
-
-
 };
-
 
 
 var waitForOpponentMove = function(){
     var turnTimer = setInterval(function() {
         $.get("/turn", function(turn) {
             turn  = turn.replace(/\"/g, "");
-            console.log("Server replied with : it's "+turn+"'s turn. ");
             if(turn === gameUI.player) {
                 $.get("/board", function(board) {
                     gameUI.setBoard(JSON.parse(board));
@@ -53,12 +50,11 @@ var waitForOpponentMove = function(){
                 clearInterval(turnTimer);
                 return turn;
             } else if(turn === "") {
-                console.log("Game over");
                 clearInterval(turnTimer);
                 return turn;
             } else {
                 gameUI.disable();
-                console.log("Still waiting");
+                gameUI.setMessage("Waiting for opponent…");
             }
         });
     }, 1000);
@@ -69,7 +65,7 @@ var waitForOpponentMove = function(){
 // Callback function for when the user makes a move
 // TODO: Re-implement this function to support multi-player
 var callback = function(row, col, player) {
-    gameUI.setMessage("It's not my turn"); // TODO: Need to change this;
+    gameUI.setMessage("Sending your move");
     gameUI.disable();
 	var data = {
 		"row": row,
@@ -81,9 +77,6 @@ var callback = function(row, col, player) {
         type: 'GET',
         url: '/move',
         data: data,
-        success: function( resp ) {
-            console.log("Server replied with legal - " + resp);
-        },
         error: function(xhr, status, error) {
             console.log(xhr + " " + status + " "+ error);
         },

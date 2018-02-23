@@ -14,7 +14,6 @@ var GameUI = function(container, player) {
 		"</table>");
 	var squareElems = [[], [], []];
 	this.tableElem.find("tr").each(function(row, tr) {
-		// console.log(tr);
 		$(tr).find("td").each(function(col, td) {
 			squareElems[row][col] = $(td);
 		});
@@ -152,7 +151,6 @@ GameUI.prototype.setMessage = function(message) {
 // Get the next move from the player
 GameUI.prototype.waitForMove = function() {
 	if (!this.ended) {
-		console.log("not ended, enabling");
 		this.enable();
 	}
 };

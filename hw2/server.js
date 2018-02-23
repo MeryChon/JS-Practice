@@ -49,10 +49,10 @@ var gameEnded = function(board) {
 	// If any line is controlled by a single player, the game is ended
 	for (var i = 0; i < lines.length; i++) {
 		if (board[lines[i][0][0]][lines[i][1][0]]
-				== board[lines[i][0][1]][lines[i][1][1]]
+				=== board[lines[i][0][1]][lines[i][1][1]]
 				&& board[lines[i][0][1]][lines[i][1][1]]
-				== board[lines[i][0][2]][lines[i][1][2]]
-				&& board[lines[i][0][0]][lines[i][1][0]] != "") {
+				=== board[lines[i][0][2]][lines[i][1][2]]
+				&& board[lines[i][0][0]][lines[i][1][0]] !== "") {
 			return true;
 		}
 	}
@@ -60,7 +60,7 @@ var gameEnded = function(board) {
 	// If all the spots are taken, the game has ended.
 	for (var row = 0; row < 3; row++) {
 		for (var col = 0; col < 3; col++) {
-			if (board[row][col] == "") {
+			if (board[row][col] === "") {
 				return false;
 			}
 		}
@@ -68,15 +68,18 @@ var gameEnded = function(board) {
 	return true;
 }
 
+
 // Client page for Player X
 app.get("/playerx", function(req, res) {
 	res.render("client", {"player": "x"});
 });
 
+
 // Client page for Player Y
 app.get("/playero", function(req, res) {
 	res.render("client", {"player": "o"});
 });
+
 
 // HTTP GET endpoint that resets the game
 app.get("/reset", function(req, res) {
@@ -88,6 +91,7 @@ app.get("/reset", function(req, res) {
 
 // HTTP GET endpoint that resets the game only if it is finished
 app.get("/newgame", function(req, res) {
+	console.log("==================== New Game ======================");
 	if (gameEnded(board)) {
 		resetGame();
 		res.send(JSON.stringify(true));
@@ -98,11 +102,15 @@ app.get("/newgame", function(req, res) {
 	}
 });
 
+
+
 // HTTP GET endpoint that gets the board
 app.get("/board", function(req, res) {
 	res.send(JSON.stringify(board));
 	res.end();
 });
+
+
 
 // HTTP GET endpoint that gets whose turn it is
 app.get("/turn", function(req, res) {
@@ -110,11 +118,39 @@ app.get("/turn", function(req, res) {
 	res.end();
 });
 
+
+var getNextPlayer = function(turn) {
+	if(turn === "x") return "o";
+	if(turn === "o") return "x";
+};
+
+var isLegalMove = function(row, col, player) {
+	return (player === turn) && (row >= 0) && (col>= 0) && (row<3) && (col<3) && (board[row][col] === "");
+};
+
+
 // HTTP GET endpoint that makes a player move
+//Upon receiving the move, the server should first check if the move is legal.
+// TODO: Implement this
 app.get("/move", function(req, res) {
-	// TODO: Implement this
-	res.send(JSON.stringify("Unimplemented"));
-	res.end();
+    console.log("------------- row: " + req.query.row + " -- col: "+req.query.col + " -- player: "+req.query.player);
+    if(!isLegalMove(req.query.row, req.query.col, req.query.player)) {
+    	res.send(JSON.stringify(false));
+	} else {
+		console.log("Server says: the move is legal.");
+        res.send(JSON.stringify(true));
+        board[req.query.row][req.query.col] = req.query.player;
+
+        console.log("board changed");
+
+        if(gameEnded(board)) {
+        	turn = "";
+		} else {
+        	turn = getNextPlayer(turn);
+        	console.log("Server changed the turn it's now "+turn);
+		}
+	}
+    res.end();
 });
 
 // Initialize the game

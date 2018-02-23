@@ -12,8 +12,9 @@ var GameUI = function(container, player) {
 		"<tr><td></td><td></td><td></td></tr>" + 
 		"<tr><td></td><td></td><td></td></tr>" + 
 		"</table>");
-	var squareElems = [[], [], []]
+	var squareElems = [[], [], []];
 	this.tableElem.find("tr").each(function(row, tr) {
+		// console.log(tr);
 		$(tr).find("td").each(function(col, td) {
 			squareElems[row][col] = $(td);
 		});
@@ -35,7 +36,7 @@ var GameUI = function(container, player) {
 
 	// Initialize game state
 	this.reset();
-}
+};
 
 // Start a new game by refreshing the client
 GameUI.prototype.newGame = function(event) {
@@ -43,7 +44,7 @@ GameUI.prototype.newGame = function(event) {
 	$.getJSON("/newgame", function(data) {
 		document.location.reload(true);
 	})
-}
+};
 
 // Sets game state
 GameUI.prototype.reset = function() {
@@ -55,24 +56,24 @@ GameUI.prototype.reset = function() {
 	this.ended = false;
 	this.winner = "";
 	this.disable();
-}
+};
 
 // Disables the UI and prevents the player from making a move
 GameUI.prototype.disable = function() {
 	this.disabled = true;
 	this.tableElem.addClass("disabled")
-}
+};
 
 // Enables the UI and allows the player to make a move
 GameUI.prototype.enable = function() {
 	this.disabled = false;
-	this.tableElem.removeClass("disabled")	
-}
+	this.tableElem.removeClass("disabled");
+};
 
 // Sets the UI message to the given text
 GameUI.prototype.setMessage = function(message) {
 	this.messageElem.text(message);
-}
+};
 
 // Internal link handler for the GameUI
 GameUI.prototype.linkHandler = function(event) {
@@ -104,7 +105,7 @@ GameUI.prototype.linkHandler = function(event) {
 // Value will be "x", "o" or "" (empty string)
 GameUI.prototype.getSquare = function(row, col) {
 	return this.board[row][col];
-}
+};
 
 // Sets the given square to given value
 // Value should be "x", "o" or "" (empty string)
@@ -113,7 +114,7 @@ GameUI.prototype.setSquare = function(row, col, value) {
 	this.board[row][col] = value;
 
 	// Update the DOM
-	if (!value || value == " ") {
+	if (!value || value === " ") {
 		// If value is "", set the square to empty
 		// Create a clickable element
 		var linkElem = $("<a href='#''>&nbsp;</a>");
@@ -124,14 +125,14 @@ GameUI.prototype.setSquare = function(row, col, value) {
 		this.squareElems[row][col]
 			.empty()
 			.append(linkElem);
-	} else if (value.toLowerCase() == "o" ) {
+	} else if (value.toLowerCase() === "o" ) {
 		// IF value is "o", set the square to an empty circle
 		this.squareElems[row][col].html("&#x25cb;")
-	} else if (value.toLowerCase() == "x" ) {
+	} else if (value.toLowerCase() === "x" ) {
 		// IF value is "x", set the square to a cross
 		this.squareElems[row][col].html("&times;")
 	}
-}
+};
 
 // Updates the interface to reflect the given board
 GameUI.prototype.setBoard = function(board) {
@@ -141,19 +142,20 @@ GameUI.prototype.setBoard = function(board) {
 		}
 	}
 	this.checkEnded();
-}
+};
 
 // Displays a game message
 GameUI.prototype.setMessage = function(message) {
 	this.messageElem.text(message);
-}
+};
 
 // Get the next move from the player
 GameUI.prototype.waitForMove = function() {
 	if (!this.ended) {
+		console.log("not ended, enabling");
 		this.enable();
 	}
-}
+};
 
 // Given a board, return true if the game has ended and false otherwise
 GameUI.prototype.checkEnded = function() { 
@@ -173,10 +175,10 @@ GameUI.prototype.checkEnded = function() {
 	var winningLine = false;
 	for (var i = 0; i < lines.length; i++) {
 		if (this.getSquare(lines[i][0][0], lines[i][1][0])
-				== this.getSquare(lines[i][0][1], lines[i][1][1])
+				=== this.getSquare(lines[i][0][1], lines[i][1][1])
 				&& this.getSquare(lines[i][0][1], lines[i][1][1])
-				== this.getSquare(lines[i][0][2], lines[i][1][2])
-				&& this.getSquare(lines[i][0][0], lines[i][1][0]) != "") {
+				=== this.getSquare(lines[i][0][2], lines[i][1][2])
+				&& this.getSquare(lines[i][0][0], lines[i][1][0]) !== "") {
 			winningLine = true;
 			this.squareElems[lines[i][0][0]][lines[i][1][0]].addClass("match");
 			this.squareElems[lines[i][0][1]][lines[i][1][1]].addClass("match");
@@ -189,7 +191,7 @@ GameUI.prototype.checkEnded = function() {
 	var allFilled = true;
 	for (var row = 0; row < 3; row++) {
 		for (var col = 0; col < 3; col++) {
-			if (this.getSquare(row, col) == "") {
+			if (this.getSquare(row, col) === "") {
 				allFilled = false;
 			}
 		}
@@ -197,9 +199,9 @@ GameUI.prototype.checkEnded = function() {
 	
 	this.ended = winningLine || allFilled;
 	if (this.ended) {
-		this.newGameElem.show()
+		this.newGameElem.show();
 		this.disable();
 	}
 	return this.ended
-}
+};
 

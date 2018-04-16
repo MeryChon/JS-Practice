@@ -4,6 +4,8 @@
 var express = require("express");
 var ejs = require("ejs");
 
+var socket = require("socket.io");
+
 // Create server
 var app = express();
 
@@ -130,13 +132,13 @@ var isLegalMove = function(row, col, player) {
 
 
 // TODO: Implement this
-app.get("/move", function(req, res) {
-    console.log("------------- row: " + req.query.row + " -- col: "+req.query.col + " -- player: "+req.query.player);
-    if(!isLegalMove(req.query.row, req.query.col, req.query.player)) {
+app.post("/move", function(req, res) {
+    console.log("------------- row: " + req.body.row + " -- col: "+req.body.col + " -- player: "+req.body.player);
+    if(!isLegalMove(req.body.row, req.body.col, req.body.player)) {
     	res.send(JSON.stringify(false));
 	} else {
         res.send(JSON.stringify(true));
-        board[req.query.row][req.query.col] = req.query.player;
+        board[req.body.row][req.body.col] = req.body.player;
         if(gameEnded(board)) {
         	turn = "";
 		} else {
@@ -151,5 +153,32 @@ resetGame();
 
 // Listen for new HTTP connections at the given port number
 var port = process.env.PORT || 4000;
-app.listen(port);
+
+
+var server = app.listen(port, function() {
+	console.log('Listening to requests on port 4000');
+});
+
+//---------
+var io = socket(server);
+
+
+// app.get('/', function(req, res) {
+//    res.sendfile('index.html');
+// });
+
+
+//Whenever someone connects this gets executed
+io.on('connection', function(socket) {
+   console.log('A user connected');
+
+   //Whenever someone disconnects this piece of code executed
+   socket.on('disconnect', function (socket) {
+      console.log('A user disconnected');
+   });
+});
+
+
+
+
 console.log("Listening for new connections on http://localhost:" + port + "/");

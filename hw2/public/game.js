@@ -5,6 +5,7 @@ var gameUI = new GameUI(".container", player);
 // Initialize game
 // TODO: Re-implement this function to support multi-player
 var init = function() {
+    
     $.get("/board", function(board) {
         gameUI.setBoard(JSON.parse(board));
     });
@@ -74,7 +75,7 @@ var callback = function(row, col, player) {
 	};
 
     $.ajax({
-        type: 'GET',
+        type: 'POST',
         url: '/move',
         data: data,
         error: function(xhr, status, error) {

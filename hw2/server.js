@@ -119,8 +119,9 @@ app.get("/turn", function(req, res) {
 
 
 var getNextPlayer = function(turn) {
-	if(turn === "x") return "o";
-	if(turn === "o") return "x";
+	return (turn == "x") ? "o" : "x";
+	// if(turn === "x") return "o";
+	// if(turn === "o") return "x";
 };
 
 var isLegalMove = function(row, col, player) {
@@ -131,7 +132,6 @@ var isLegalMove = function(row, col, player) {
 
 // TODO: Implement this
 app.get("/move", function(req, res) {
-    console.log("------------- row: " + req.query.row + " -- col: "+req.query.col + " -- player: "+req.query.player);
     if(!isLegalMove(req.query.row, req.query.col, req.query.player)) {
     	res.send(JSON.stringify(false));
 	} else {

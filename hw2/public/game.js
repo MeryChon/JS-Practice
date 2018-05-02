@@ -15,10 +15,10 @@ var init = function() {
     $.get("/turn", function(resp) {
         turn = JSON.parse(resp);
     });
-
     if(turn === gameUI.player) {
         gameUI.setMessage("It is your move.");
-        waitForNextMove();
+        waitForMove();
+        // waitForNextMove();
     } else if(turn === "") {
         gameUI.setMessage("The game has ended.");
     } else {
@@ -31,13 +31,13 @@ var init = function() {
 var waitForNextMove = function(){
     var turnTimer = setInterval(function() {
         $.get("/turn", function(turn) {
-            turn = JSON.parse(turn);  
+            turn = JSON.parse(turn);
             if(turn === gameUI.player) {
                 gameUI.setMessage("It is your turn");
                 $.get("/board", function(board) {
                     gameUI.setBoard(JSON.parse(board));
                 });
-                gameUI.waitForMove(); 
+                    gameUI.waitForMove(); 
                 clearInterval(turnTimer);
             } else if(turn === "") {
                 $.get("/board", function(board) {
@@ -63,12 +63,13 @@ var callback = function(row, col, player) {
 		"player": player
 	};
 
-    $.getJSON('/move', data, function(resp){
+    $.get('/move', data, function(resp){
+        resp = JSON.parse(resp);
         if(resp) {
             gameUI.setMessage("Waiting for opponent...");
             waitForNextMove();
         } else {
-            gameUI.setMessage("Oops. Invalid move");
+            gameUI.setMessage("Invalid move");
             gameUI.waitForMove();
         }
     });
